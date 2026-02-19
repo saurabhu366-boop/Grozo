@@ -1,0 +1,54 @@
+name: shopzy
+description: "A premium, self-checkout grocery application with a modern, clean UI."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI + Core
+  cupertino_icons: ^1.0.2
+  google_fonts: ^6.2.1
+  intl: ^0.18.1
+
+  # Scanner
+  mobile_scanner: ^5.2.3
+
+  # API / Networking
+  http: ^1.2.0
+  connectivity_plus: ^5.0.2
+
+  # Storage
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.0
+
+  # State management (optional but useful)
+  provider: ^6.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  flutter_launcher_icons: ^0.13.1
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
+
+# Launcher icon configuration
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo.png"
+  adaptive_icon_background: "#FAFAFA"
+  adaptive_icon_foreground: "assets/logo.png"
+  remove_alpha_ios: true
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/logo.png
