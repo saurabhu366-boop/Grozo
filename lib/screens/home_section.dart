@@ -1,7 +1,9 @@
 // lib/screens/home_section.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shopzy/data/mock_database.dart';
 import 'package:shopzy/models/grocery_item.dart';
+import 'package:shopzy/providers/auth_provider.dart';
 import 'package:shopzy/screens/ai_assistant_screen.dart';
 import 'package:shopzy/utils/app_colors.dart';
 import 'package:shopzy/widgets/in_store_nav_card.dart';
@@ -13,6 +15,10 @@ class HomeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Read real name from AuthProvider — no more hardcoded "Sahil"
+    final name = context.watch<AuthProvider>().fullName ?? 'there';
+    final firstName = name.split(' ').first; // "Sourabh Kumar" → "Sourabh"
+
     // Mock data for general "Recommended" section
     final List<String> recommendedBarcodes = [
       '9876543210987', // Whole Wheat Bread
@@ -32,7 +38,7 @@ class HomeSection extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.only(top: 20),
           children: [
-            _buildHeader(),
+            _buildHeader(context, firstName),
             const SizedBox(height: 24),
             _buildAiPanel(context),
             const SizedBox(height: 24),
@@ -50,7 +56,7 @@ class HomeSection extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context, String firstName) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
@@ -69,7 +75,8 @@ class HomeSection extends StatelessWidget {
                   ),
                   children: [
                     TextSpan(
-                      text: 'Sahil',
+                      // ✅ Real name from AuthProvider
+                      text: firstName,
                       style: const TextStyle(color: AppColors.primary),
                     ),
                   ],

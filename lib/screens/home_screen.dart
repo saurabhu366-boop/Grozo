@@ -1,9 +1,9 @@
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
-import 'package:shopzy/screens/account_section.dart';
+import 'package:shopzy/screens/account_section.dart' show AccountSection;
 import 'package:shopzy/screens/barcode_scanner_screen.dart';
 import 'package:shopzy/screens/cart_screen.dart';
-import 'package:shopzy/screens/category_section.dart';
+import 'package:shopzy/screens/category_section.dart' show CategorySection;
 import 'package:shopzy/screens/home_section.dart';
 import 'package:shopzy/utils/app_colors.dart';
 import 'package:shopzy/widgets/cart_icon_widget.dart';
@@ -21,8 +21,11 @@ class _HomeScreenState extends State<HomeScreen> {
   // ✅ FIX: Wrap each page in _BottomPaddedPage so content never hides
   // behind the BottomAppBar when extendBody: true is set.
   // 90 = ~70 (BottomAppBar height) + 20 extra breathing room
-  final List<Widget> _pages = const [
-    _BottomPaddedPage(child: HomeSection(key: ValueKey('home_section'))),
+  // ✅ FIX: removed `const` — CategorySection and AccountSection are now
+  // StatefulWidgets. Const requires the entire widget tree to be compile-time
+  // constant, which isn't possible for StatefulWidgets that manage state.
+  final List<Widget> _pages = [
+    const _BottomPaddedPage(child: HomeSection(key: ValueKey('home_section'))),
     _BottomPaddedPage(child: CategorySection(key: ValueKey('category_section'))),
     _BottomPaddedPage(child: CartScreen(key: ValueKey('cart_screen'))),
     _BottomPaddedPage(child: AccountSection(key: ValueKey('account_section'))),
