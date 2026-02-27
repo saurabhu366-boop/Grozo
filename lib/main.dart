@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:shopzy/providers/Auth provider.dart';
+import 'package:shopzy/providers/auth_provider.dart';
 import 'package:shopzy/screens/splash_screen.dart';
 import 'package:shopzy/utils/app_colors.dart';
 

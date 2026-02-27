@@ -10,17 +10,12 @@ import 'package:http/http.dart' as http;
 
 import '../models/auth_models.dart';
 import '../utils/Token_storage.dart';
-
-/// Change this to match your running backend:
-/// - Android emulator  →  http://10.0.2.2:8087
-/// - iOS simulator     →  http://127.0.0.1:8087
-/// - Real device       →  http://<YOUR_PC_LAN_IP>:8087
-const String kBaseUrl = 'http://192.168.0.104:8087';
+import 'api_config.dart';
 
 class AuthService {
   final String baseUrl;
 
-  AuthService({String? baseUrl}) : baseUrl = baseUrl ?? kBaseUrl;
+  AuthService({String? baseUrl}) : baseUrl = baseUrl ?? ApiConfig.baseUrl;
 
   // ────────────────────────────────────────────────────────────
   // REGISTER

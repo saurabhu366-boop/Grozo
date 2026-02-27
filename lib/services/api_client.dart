@@ -13,9 +13,10 @@ class ApiClient {
   Future<dynamic> get(String endpoint) async {
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+      final headers = await ApiConfig.getAuthHeaders();
 
       final response = await _client
-          .get(uri, headers: ApiConfig.headers)
+          .get(uri, headers: headers)
           .timeout(ApiConfig.connectionTimeout);
 
       return _handleResponse(response);
@@ -29,17 +30,17 @@ class ApiClient {
   }
 
   // ================= POST =================
-  Future<dynamic> post(String endpoint,
-      {Map<String, dynamic>? body}) async {
+  Future<dynamic> post(String endpoint, {Map<String, dynamic>? body}) async {
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+      final headers = await ApiConfig.getAuthHeaders();
 
       final response = await _client
           .post(
-        uri,
-        headers: ApiConfig.headers,
-        body: body != null ? jsonEncode(body) : null,
-      )
+            uri,
+            headers: headers,
+            body: body != null ? jsonEncode(body) : null,
+          )
           .timeout(ApiConfig.connectionTimeout);
 
       return _handleResponse(response);
@@ -53,17 +54,17 @@ class ApiClient {
   }
 
   // ================= PUT =================
-  Future<dynamic> put(String endpoint,
-      {Map<String, dynamic>? body}) async {
+  Future<dynamic> put(String endpoint, {Map<String, dynamic>? body}) async {
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+      final headers = await ApiConfig.getAuthHeaders();
 
       final response = await _client
           .put(
-        uri,
-        headers: ApiConfig.headers,
-        body: body != null ? jsonEncode(body) : null,
-      )
+            uri,
+            headers: headers,
+            body: body != null ? jsonEncode(body) : null,
+          )
           .timeout(ApiConfig.connectionTimeout);
 
       return _handleResponse(response);
@@ -76,18 +77,18 @@ class ApiClient {
     }
   }
 
-  // ================= DELETE (FIXED) =================
-  Future<dynamic> delete(String endpoint,
-      {Map<String, dynamic>? body}) async {
+  // ================= DELETE =================
+  Future<dynamic> delete(String endpoint, {Map<String, dynamic>? body}) async {
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+      final headers = await ApiConfig.getAuthHeaders();
 
       final response = await _client
           .delete(
-        uri,
-        headers: ApiConfig.headers,
-        body: body != null ? jsonEncode(body) : null,
-      )
+            uri,
+            headers: headers,
+            body: body != null ? jsonEncode(body) : null,
+          )
           .timeout(ApiConfig.connectionTimeout);
 
       return _handleResponse(response);
@@ -127,9 +128,7 @@ class ApiClient {
     try {
       final body = jsonDecode(response.body);
       if (body is Map<String, dynamic>) {
-        return body['message'] ??
-            body['error'] ??
-            'An error occurred';
+        return body['message'] ?? body['error'] ?? 'An error occurred';
       }
       return response.body;
     } catch (e) {
