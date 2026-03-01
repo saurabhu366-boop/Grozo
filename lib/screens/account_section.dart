@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopzy/providers/auth_provider.dart';
+import 'package:shopzy/screens/edit_profile_screen.dart';
 import 'package:shopzy/screens/login_screen.dart';
 import 'package:shopzy/screens/rewards_screen.dart';
 import 'package:shopzy/screens/scan_history_screen.dart';
@@ -208,7 +209,9 @@ class AccountSection extends StatelessWidget {
                         iconColor: const Color(0xFF5C6BC0),
                         title: 'Edit Profile',
                         subtitle: 'Update your details',
-                        onTap: () {},
+                        onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) => const EditProfileScreen())),
                       ),
                       _Divider(),
                       _OptionTile(

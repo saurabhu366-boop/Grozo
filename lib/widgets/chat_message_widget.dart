@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shopzy/models/chat_message.dart';
 import 'package:shopzy/utils/app_colors.dart';
+import 'package:shopzy/widgets/recipe_card_widget.dart';
 
 class ChatMessageWidget extends StatelessWidget {
   final ChatMessage message;
@@ -162,6 +163,9 @@ class ChatMessageWidget extends StatelessWidget {
     switch (responseType) {
       case 'deal_card':
         content = _buildDealCard(response);
+        break;
+      case 'recipe_card':
+        content = RecipeCardWidget(recipeData: response);
         break;
       default:
         content = _buildFormattedText(message.text);

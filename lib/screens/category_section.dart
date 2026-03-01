@@ -207,7 +207,7 @@ class _CategorySectionState extends State<CategorySection> {
                 crossAxisCount: 2,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
-                childAspectRatio: 0.82,
+                childAspectRatio: 0.95,
               ),
               itemCount: filtered.length,
               itemBuilder: (context, index) =>
@@ -323,84 +323,70 @@ class _CategoryCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.black.withOpacity(0.72),
-                      Colors.black.withOpacity(0.1),
+                      Colors.black.withOpacity(0.8),
+                      Colors.transparent,
                     ],
-                    stops: const [0.0, 0.65],
+                    stops: const [0.0, 0.5],
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                   ),
                 ),
               ),
 
-              // ── Color tint at top ───────────────────────────
+              // ── Item count pill at top-left ─────────────────
               Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
+                top: 16,
+                left: 16,
                 child: Container(
-                  height: 4,
-                  color: color,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    category['count'] as String,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
 
-              // ── Text content ────────────────────────────────
+              // ── Category name at bottom-left ────────────────
               Positioned(
-                bottom: 14,
-                left: 14,
-                right: 14,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // ✨ Item count pill
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.85),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        category['count'] as String,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      category['name'] as String,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: -0.3,
-                        shadows: [
-                          Shadow(blurRadius: 6, color: Colors.black54)
-                        ],
-                      ),
-                    ),
-                  ],
+                bottom: 16,
+                left: 16,
+                right: 48, // leave space for the arrow
+                child: Text(
+                  category['name'] as String,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: -0.3,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
 
-              // ── Arrow indicator ─────────────────────────────
+              // ── Arrow indicator at bottom-right ─────────────
               Positioned(
-                top: 12,
-                right: 12,
+                bottom: 16,
+                right: 16,
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.black.withOpacity(0.4),
+                    shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.arrow_forward_ios_rounded,
                     color: Colors.white,
-                    size: 10,
+                    size: 12,
                   ),
                 ),
               ),

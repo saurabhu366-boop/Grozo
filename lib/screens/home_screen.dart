@@ -22,11 +22,6 @@ class _HomeScreenState extends State<HomeScreen>
   late AnimationController _fabAnimCtrl;
   late Animation<double> _fabScaleAnim;
 
-  // ✅ FIX: No _BottomPaddedPage wrapper.
-  // CategorySection, AccountSection, CartScreen are all full Scaffold widgets.
-  // Wrapping a Scaffold in Padding does nothing — the Scaffold ignores it.
-  // Each screen handles its own bottom clearance via SizedBox at the end
-  // of its scroll view (height >= 100 clears the 64px nav bar + FAB).
   final List<Widget> _pages = [
     const HomeSection(key: ValueKey('home_section')),
     CategorySection(key: ValueKey('category_section')),
@@ -65,6 +60,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    const activeGreen = Color(0xFF2DB45D); // ✅ YOUR COLOR
+
     return Scaffold(
       extendBody: true,
       backgroundColor: const Color(0xFFF5F7F2),
@@ -77,28 +74,17 @@ class _HomeScreenState extends State<HomeScreen>
       floatingActionButton: ScaleTransition(
         scale: _fabScaleAnim,
         child: Container(
-          width: 60,
-          height: 60,
+          width: 64,
+          height: 64,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: [
-                AppColors.primary,
-                Color.fromARGB(
-                  AppColors.primary.alpha,
-                  AppColors.primary.red,
-                  (AppColors.primary.green + 30).clamp(0, 255),
-                  AppColors.primary.blue,
-                ),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: activeGreen, // ✅ updated
+            border: Border.all(color: Colors.white, width: 4),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(0.45),
+                color: activeGreen.withOpacity(0.3),
                 blurRadius: 16,
-                offset: const Offset(0, 6),
+                offset: const Offset(0, 8),
               ),
             ],
           ),
@@ -119,52 +105,59 @@ class _HomeScreenState extends State<HomeScreen>
 
       // ── Bottom nav ──────────────────────────────────────────
       bottomNavigationBar: Container(
+        margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
         decoration: BoxDecoration(
           color: Colors.white,
+          borderRadius: BorderRadius.circular(40),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 20,
-              offset: const Offset(0, -4),
+              offset: const Offset(0, 10),
             ),
           ],
         ),
         child: BottomAppBar(
-          color: Colors.white,
+          color: Colors.transparent,
           elevation: 0,
-          notchMargin: 10.0,
-          // ✅ FIX: explicit height — without this the Column inside overflows
+          padding: EdgeInsets.zero,
           height: 72,
-          shape: const CircularNotchedRectangle(),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _NavItem(
-                icon: Icons.home_rounded,
+                icon: Icons.home_outlined,
+                activeIcon: Icons.home_rounded,
                 label: 'Home',
                 index: 0,
                 selectedIndex: _selectedIndex,
                 onTap: _onItemTapped,
+                activeColor: activeGreen,
               ),
               _NavItem(
-                icon: Icons.grid_view_rounded,
+                icon: Icons.grid_view_outlined,
+                activeIcon: Icons.grid_view_rounded,
                 label: 'Categories',
                 index: 1,
                 selectedIndex: _selectedIndex,
                 onTap: _onItemTapped,
+                activeColor: activeGreen,
               ),
               const SizedBox(width: 48),
               _CartNavItem(
                 index: 2,
                 selectedIndex: _selectedIndex,
                 onTap: _onItemTapped,
+                activeColor: activeGreen,
               ),
               _NavItem(
                 icon: Icons.person_outline_rounded,
-                label: 'Profile',
+                activeIcon: Icons.person_rounded,
+                label: 'Account',
                 index: 3,
                 selectedIndex: _selectedIndex,
                 onTap: _onItemTapped,
+                activeColor: activeGreen,
               ),
             ],
           ),
@@ -174,59 +167,47 @@ class _HomeScreenState extends State<HomeScreen>
   }
 }
 
-// ── Nav item ─────────────────────────────────────────────────────────────────
+// ── Nav item ─────────────────────────────────────────────────
 class _NavItem extends StatelessWidget {
   final IconData icon;
+  final IconData activeIcon;
   final String label;
   final int index;
   final int selectedIndex;
   final ValueChanged<int> onTap;
+  final Color activeColor;
 
   const _NavItem({
     required this.icon,
+    required this.activeIcon,
     required this.label,
     required this.index,
     required this.selectedIndex,
     required this.onTap,
+    required this.activeColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final isSelected = selectedIndex == index;
+    final color = isSelected ? activeColor : const Color(0xFF9CA3AF);
+
     return Expanded(
-      child: InkWell(
+      child: GestureDetector(
         onTap: () => onTap(index),
-        borderRadius: BorderRadius.circular(12),
+        behavior: HitTestBehavior.opaque,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primary.withOpacity(0.12)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(
-                icon,
-                size: 22,
-                color: isSelected ? AppColors.primary : AppColors.inactiveIcon,
-              ),
-            ),
-            const SizedBox(height: 1),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? AppColors.primary : AppColors.inactiveIcon,
-              ),
-              child: Text(label),
-            ),
+            Icon(isSelected ? activeIcon : icon, size: 26, color: color),
+            if (isSelected) ...[
+              const SizedBox(height: 4),
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: color)),
+            ],
           ],
         ),
       ),
@@ -234,86 +215,49 @@ class _NavItem extends StatelessWidget {
   }
 }
 
-// ── Cart nav item — custom badge icon, NO IconButton (avoids 48px min height) ─
+// ── Cart nav item ────────────────────────────────────────────
 class _CartNavItem extends StatelessWidget {
   final int index;
   final int selectedIndex;
   final ValueChanged<int> onTap;
+  final Color activeColor;
 
-  // Same CartService instance as CartIconWidget uses
   static final CartService _cartService = CartService();
 
   const _CartNavItem({
     required this.index,
     required this.selectedIndex,
     required this.onTap,
+    required this.activeColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final isSelected = selectedIndex == index;
+    final color = isSelected ? activeColor : const Color(0xFF9CA3AF);
+
     return Expanded(
       child: GestureDetector(
         onTap: () => onTap(index),
         behavior: HitTestBehavior.opaque,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // ✅ Stack with plain Icon — no IconButton, no forced 48px minimum
-            ValueListenableBuilder<int>(
-              valueListenable: _cartService.cartItemCount,
-              builder: (context, count, _) {
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Icon(
-                      isSelected
-                          ? Icons.shopping_bag
-                          : Icons.shopping_bag_outlined,
-                      size: 24,
-                      color: isSelected
-                          ? AppColors.primary
-                          : AppColors.inactiveIcon,
-                    ),
-                    if (count > 0)
-                      Positioned(
-                        top: -5,
-                        right: -6,
-                        child: Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 1.5),
-                          ),
-                          constraints: const BoxConstraints(
-                              minWidth: 16, minHeight: 16),
-                          child: Text(
-                            '$count',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
+            Icon(
+              isSelected
+                  ? Icons.shopping_cart_rounded
+                  : Icons.shopping_cart_outlined,
+              size: 26,
+              color: color,
             ),
-            const SizedBox(height: 3),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? AppColors.primary : AppColors.inactiveIcon,
-              ),
-              child: const Text('Cart'),
-            ),
+            if (isSelected) ...[
+              const SizedBox(height: 4),
+              Text('Cart',
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: color)),
+            ],
           ],
         ),
       ),

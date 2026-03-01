@@ -10,30 +10,7 @@ class InStoreNavCard extends StatefulWidget {
   State<InStoreNavCard> createState() => _InStoreNavCardState();
 }
 
-class _InStoreNavCardState extends State<InStoreNavCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat();
-
-    _pulseAnimation = Tween<double>(begin: 0.0, end: 20.0).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    super.dispose();
-  }
-
+class _InStoreNavCardState extends State<InStoreNavCard> {
   void _navigateToInStoreMode(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const InStoreModeScreen()),
@@ -42,83 +19,70 @@ class _InStoreNavCardState extends State<InStoreNavCard>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 200,
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Background Map Image
-            Image.network(
-              'https://i.pinimg.com/564x/e7/5b/c9/e75bc94262f3f1a0e820252b47118f0a.jpg',
-              fit: BoxFit.cover,
-              color: AppColors.background.withOpacity(0.4),
-              colorBlendMode: BlendMode.dstATop,
-            ),
+    return GestureDetector(
+      onTap: () => _navigateToInStoreMode(context),
+      child: Container(
+        height: 200,
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Background Map Image
+              Image.network(
+                'https://www.dreamstime.com/supermarket-interior-flat-vector-illustration-grocery-store-shelves-food-products-cartoon-food-shop-aisle-bakery-meat-image166466892',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Image.network(
+                  'https://static.vecteezy.com/system/resources/previews/057/219/123/large_2x/grocery-store-front-view-supermarket-food-inside-interior-design-vector.jpg',
+                  fit: BoxFit.cover,
+                ),
+              ),
 
-            // User Location Pulse
-            Center(
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  AnimatedBuilder(
-                    animation: _pulseAnimation,
-                    builder: (context, child) {
-                      return Container(
-                        width: _pulseAnimation.value,
-                        height: _pulseAnimation.value,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.blue
-                              .withOpacity(1 - _pulseController.value),
-                        ),
-                      );
-                    },
+              // Map UI Overlay Elements
+              Container(color: Colors.white.withOpacity(0.15)),
+
+              // User Location Pulse
+              Positioned(
+                bottom: 40,
+                left: 60,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.3),
+                    shape: BoxShape.circle,
                   ),
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.blue.shade700,
-                      border: Border.all(color: Colors.white, width: 2),
+                  child: Center(
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: const BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
 
-            // Store Section Markers
-            const _AisleMarker(
-                icon: Icons.eco_outlined, // Produce
-                color: Color(0xFF4CAF50),
-                top: 70,
-                left: 40),
-            const _AisleMarker(
-                icon: Icons.local_drink_outlined, // Drinks/Dairy
-                color: Color(0xFF2196F3),
-                top: 70,
-                left: 100),
-            const _AisleMarker(
-                icon: Icons.bakery_dining_outlined, // Bakery
-                color: Color(0xFFFF9800),
-                top: 70,
-                right: 40),
-            const _AisleMarker(
-                icon: Icons.set_meal_outlined, // Meat
-                color: Color(0xFFF44336),
-                top: 130,
-                left: 70),
+              // Map Pins
+              // const Positioned(
+              //   top: 80,
+              //   right: 50,
+              //   child: Icon(Icons.location_on, color: Colors.redAccent, size: 32),
+              // ),
+              // const Positioned(
+              //   bottom: 60,
+              //   right: 100,
+              //   child: Icon(Icons.location_on, color: Colors.orangeAccent, size: 28),
+              // ),
 
-            // Top Interactive Card
-            Positioned(
-              top: 20,
-              left: 20,
-              right: 20,
-              child: GestureDetector(
-                onTap: () => _navigateToInStoreMode(context),
+              // Top Label Pill
+              Positioned(
+                top: 20,
+                left: 20,
+                right: 20,
                 child: Container(
                   padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -161,43 +125,9 @@ class _InStoreNavCardState extends State<InStoreNavCard>
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
-}
-
-class _AisleMarker extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final double? top, bottom, left, right;
-
-  const _AisleMarker({
-    required this.icon,
-    required this.color,
-    this.top,
-    this.bottom,
-    this.left,
-    this.right,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: top,
-      bottom: bottom,
-      left: left,
-      right: right,
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.2),
-          shape: BoxShape.circle,
-          border: Border.all(color: color, width: 2),
-        ),
-        child: Icon(icon, color: color, size: 20),
       ),
     );
   }

@@ -3,12 +3,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shopzy/providers/auth_provider.dart';
 import 'package:shopzy/services/cart_api_service.dart' as backend;
 import 'package:shopzy/utils/app_colors.dart';
 import 'package:shopzy/widgets/cart_icon_widget.dart';
+
+// ✅ FINAL FIX: Removed permission_handler entirely.
+// mobile_scanner v3+ requests camera permission internally when MobileScanner
+// widget mounts. Our manual Permission.camera.status was returning a stale
+// cached value and blocking the camera widget from ever mounting.
 
 class BarcodeScannerScreen extends StatefulWidget {
   const BarcodeScannerScreen({super.key});
@@ -18,22 +22,16 @@ class BarcodeScannerScreen extends StatefulWidget {
 }
 
 class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
 
-  // ✅ FIX 1: autoStart: false — manually start AFTER permission granted.
-  // Default autoStart: true tries to open camera before permission is checked
-  // → MobileScanner renders a black screen with no error.
   final MobileScannerController _scannerController = MobileScannerController(
-    autoStart: false,
+    autoStart: true, // MobileScanner requests permission + starts itself
   );
   final backend.CartService _backendCartService = backend.CartService();
 
   bool _isScanning = false;
   bool _isTorchOn = false;
-  bool _hasCameraPermission = false;
-  bool _permissionDenied = false;
 
-  // ✅ FIX 2: userId from AuthProvider, not hardcoded
   String get _userId => context.read<AuthProvider>().userId ?? '';
 
   late AnimationController _animationController;
@@ -42,35 +40,27 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
   @override
   void initState() {
     super.initState();
-
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
-
     _scanLineAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-
-    // ✅ FIX 3: Ask for permission on open, then start camera
-    _requestCameraPermission();
+    WidgetsBinding.instance.addObserver(this);
   }
 
-  Future<void> _requestCameraPermission() async {
-    final status = await Permission.camera.request();
-    if (!mounted) return;
-
-    if (status.isGranted) {
-      setState(() => _hasCameraPermission = true);
-      await _scannerController.start(); // ✅ FIX 4: Explicitly start the camera
-    } else {
-      setState(() => _permissionDenied = true);
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _scannerController.start();
+    } else if (state == AppLifecycleState.paused) {
+      _scannerController.stop();
     }
   }
 
   Future<void> _onDetect(BarcodeCapture capture) async {
     if (_isScanning || capture.barcodes.isEmpty) return;
-
     final String? code = capture.barcodes.first.rawValue;
     if (code == null) return;
 
@@ -85,8 +75,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
             content: Text('✓ Added to cart: $code'),
             backgroundColor: AppColors.primary,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -98,8 +87,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
             content: Text(e.toString().replaceFirst('Exception: ', '')),
             backgroundColor: Colors.red.shade600,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -112,92 +100,36 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
+    _scannerController.stop();
     _scannerController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // ✅ FIX 5: Show a helpful UI when permission is denied instead of black screen
-    if (_permissionDenied) {
-      return Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.camera_alt_outlined,
-                      color: Colors.white54, size: 64),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Camera Permission Required',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Please enable camera access in your device settings to scan products.',
-                    style: TextStyle(color: Colors.white60, fontSize: 14),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  ElevatedButton(
-                    onPressed: openAppSettings,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 32, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
-                    ),
-                    child: const Text('Open Settings',
-                        style: TextStyle(color: Colors.white)),
-                  ),
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Go Back',
-                        style: TextStyle(color: Colors.white54)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // ✅ FIX 6: Show loading spinner while waiting for permission response,
-          // camera feed only shown after permission is confirmed granted
-          if (_hasCameraPermission)
-            MobileScanner(
-              controller: _scannerController,
-              onDetect: _onDetect,
-            )
-          else
-            const Center(
-              child: CircularProgressIndicator(color: Colors.white54),
-            ),
+          // ✅ Mount MobileScanner directly — no permission gating.
+          // It shows the system permission dialog itself on first launch.
+          // errorBuilder handles denied/unsupported cases.
+          MobileScanner(
+            controller: _scannerController,
+            onDetect: _onDetect,
+            errorBuilder: (context, error, child) {
+              return _ErrorView(error: error);
+            },
+          ),
 
-          // Overlay only shown when camera is active
-          if (_hasCameraPermission)
-            _BarcodeScannerOverlay(
-              scanLineAnimation: _scanLineAnimation,
-              isScanning: _isScanning,
-            ),
+          _BarcodeScannerOverlay(
+            scanLineAnimation: _scanLineAnimation,
+            isScanning: _isScanning,
+          ),
 
-          // Top controls — always visible
+          // Top controls
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -211,28 +143,25 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
-                  if (_hasCameraPermission)
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: Colors.black54,
-                          child: IconButton(
-                            icon: Icon(
-                              _isTorchOn
-                                  ? Icons.flashlight_on
-                                  : Icons.flashlight_off,
-                              color: Colors.white,
-                            ),
-                            onPressed: () {
-                              _scannerController.toggleTorch();
-                              setState(() => _isTorchOn = !_isTorchOn);
-                            },
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.black54,
+                        child: IconButton(
+                          icon: Icon(
+                            _isTorchOn ? Icons.flashlight_on : Icons.flashlight_off,
+                            color: Colors.white,
                           ),
+                          onPressed: () {
+                            _scannerController.toggleTorch();
+                            setState(() => _isTorchOn = !_isTorchOn);
+                          },
                         ),
-                        const SizedBox(width: 12),
-                        CartIconWidget(isLight: true),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 12),
+                      CartIconWidget(isLight: true),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -243,10 +172,62 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
   }
 }
 
-// ---------------------------------------------------------------------------
-// Barcode Scanner Overlay Widget — unchanged
-// ---------------------------------------------------------------------------
+// ── Error view (permission denied / unsupported device) ──────────────────────
+class _ErrorView extends StatelessWidget {
+  final MobileScannerException error;
+  const _ErrorView({required this.error});
 
+  @override
+  Widget build(BuildContext context) {
+    final bool isPermissionError =
+        error.errorCode == MobileScannerErrorCode.permissionDenied;
+
+    return Container(
+      color: Colors.black,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isPermissionError
+                    ? Icons.camera_alt_outlined
+                    : Icons.error_outline,
+                color: Colors.white54,
+                size: 64,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                isPermissionError
+                    ? 'Camera permission is required to scan products.\n\nGo to Settings → Apps → Grozo → Permissions and enable Camera.'
+                    : 'Camera error: ${error.errorCode}',
+                style: const TextStyle(
+                    color: Colors.white70, fontSize: 14, height: 1.6),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 32, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+                child: const Text('Go Back',
+                    style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Scanner overlay ───────────────────────────────────────────────────────────
 class _BarcodeScannerOverlay extends StatelessWidget {
   final Animation<double> scanLineAnimation;
   final bool isScanning;
@@ -406,7 +387,6 @@ class _CornerBracketPainter extends CustomPainter {
     final h = size.height;
     final r = radius;
     final c = cornerLength;
-
     canvas.drawPath(Path()..moveTo(0, c + r)..lineTo(0, r)..arcToPoint(Offset(r, 0), radius: Radius.circular(r))..lineTo(c + r, 0), paint);
     canvas.drawPath(Path()..moveTo(w - c - r, 0)..lineTo(w - r, 0)..arcToPoint(Offset(w, r), radius: Radius.circular(r))..lineTo(w, c + r), paint);
     canvas.drawPath(Path()..moveTo(w, h - c - r)..lineTo(w, h - r)..arcToPoint(Offset(w - r, h), radius: Radius.circular(r))..lineTo(w - c - r, h), paint);

@@ -5,6 +5,7 @@ import 'package:shopzy/data/mock_database.dart';
 import 'package:shopzy/models/grocery_item.dart';
 import 'package:shopzy/providers/auth_provider.dart';
 import 'package:shopzy/screens/ai_assistant_screen.dart';
+import 'package:shopzy/screens/recommended_products_screen.dart';
 import 'package:shopzy/utils/app_colors.dart';
 import 'package:shopzy/widgets/in_store_nav_card.dart';
 import 'package:shopzy/widgets/product_card.dart';
@@ -15,17 +16,22 @@ class HomeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Read real name from AuthProvider — no more hardcoded "Sahil"
     final name = context.watch<AuthProvider>().fullName ?? 'there';
-    final firstName = name.split(' ').first; // "Sourabh Kumar" → "Sourabh"
+    final firstName = name.split(' ').first;
 
-    // Mock data for general "Recommended" section
     final List<String> recommendedBarcodes = [
-      '9876543210987', // Whole Wheat Bread
-      '4567890123456', // Standard Yogurt
-      '8901234567890', // Organic Almonds
-      '1234567890128', // Fresh Orange Juice
+      '9876543210987',
+      '4567890123456',
+      '8901234567890',
+      '8901058901511',
+      '1234567890128',
+      '4567890123457',
+      '6543210987654',
+      '8901719255144',
+      '8901058901512',
+      '1112223334445',
     ];
+
     final recommendedItems = recommendedBarcodes
         .map((barcode) => MockDatabase.findByBarcode(barcode))
         .where((item) => item != null)
@@ -46,7 +52,13 @@ class HomeSection extends StatelessWidget {
             const SizedBox(height: 30),
             _buildFeaturedDeals(context),
             const SizedBox(height: 30),
-            _buildSectionHeader('Recommended', () {}, showSeeMore: true),
+            _buildSectionHeader('Recommended', () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => RecommendedProductsScreen(items: recommendedItems),
+                ),
+              );
+            }, showSeeMore: true),
             const SizedBox(height: 16),
             _buildProductCarousel(recommendedItems),
             const SizedBox(height: 120),
@@ -75,7 +87,6 @@ class HomeSection extends StatelessWidget {
                   ),
                   children: [
                     TextSpan(
-                      // ✅ Real name from AuthProvider
                       text: firstName,
                       style: const TextStyle(color: AppColors.primary),
                     ),
@@ -95,7 +106,8 @@ class HomeSection extends StatelessWidget {
           ),
           const CircleAvatar(
             radius: 24,
-            backgroundImage: NetworkImage('https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'),
+            backgroundImage: NetworkImage(
+                'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg'),
           ),
         ],
       ),
@@ -121,7 +133,10 @@ class HomeSection extends StatelessWidget {
               onPressed: onSeeMore,
               child: const Text(
                 'See More >',
-                style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 14),
+                style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14),
               ),
             ),
         ],
@@ -159,7 +174,7 @@ class HomeSection extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 20),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.accentBlack,
+          color: const Color(0xFF1A1A2E), // ✅ Updated AI card color
           borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
@@ -170,7 +185,8 @@ class HomeSection extends StatelessWidget {
                 color: AppColors.primary.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.psychology_alt_outlined, color: AppColors.primary, size: 28),
+              child: const Icon(Icons.psychology_alt_outlined,
+                  color: AppColors.primary, size: 28),
             ),
             const SizedBox(width: 16),
             const Expanded(
@@ -178,12 +194,11 @@ class HomeSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Grozo AI',
+                    'Grozo AI✨',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textOnBlack,
-                        fontSize: 16
-                    ),
+                        fontSize: 16),
                   ),
                   Text(
                     'Based on your diet, we found 4 new recipes.',
@@ -192,7 +207,8 @@ class HomeSection extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, color: AppColors.secondaryText, size: 16),
+            const Icon(Icons.arrow_forward_ios,
+                color: AppColors.secondaryText, size: 16),
           ],
         ),
       ),

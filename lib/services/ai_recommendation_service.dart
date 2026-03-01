@@ -21,6 +21,11 @@ class AiRecommendationService {
         final avocado = MockDatabase.findByBarcode('6543210987654');
         if (avocado != null) complementary.add(avocado);
       }
+    } else if (scannedItem.barcode == '8901719255144') { // Parle-G
+      if (!cartBarcodes.contains('8901058901511')) { // If Maggi not in cart
+        final maggi = MockDatabase.findByBarcode('8901058901511');
+        if (maggi != null) complementary.add(maggi);
+      }
     }
 
     // 2. Upgrade Suggestion
@@ -55,6 +60,9 @@ class AiRecommendationService {
     }
     if (scannedItem.calories > 200) {
       nutritionTips.add('Energy-rich! Perfect for a pre-workout boost.');
+    }
+    if (scannedItem.barcode == '8901058901511') {
+      nutritionTips.add('Quick energy source! Enjoy in moderation as part of a balanced diet.');
     }
 
     // 5. Reward & Gamification Layer

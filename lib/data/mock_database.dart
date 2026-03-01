@@ -3,7 +3,7 @@ import 'package:shopzy/models/grocery_item.dart';
 
 class MockDatabase {
   static final Map<String, GroceryItem> items = {
-    '8901234567890': const GroceryItem(
+    '8901058851298': const GroceryItem(
         barcode: '8901058851298',
         name: 'Maggiee',
         category: 'Snacks',
