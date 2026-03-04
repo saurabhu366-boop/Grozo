@@ -1,35 +1,36 @@
 import 'package:shopzy/utils/Token_storage.dart';
 
 class ApiConfig {
-  // Android emulator -> Spring Boot on host machine (port 8087)
   static const String baseUrl = "http://192.168.0.104:8087";
 
-  // Endpoints (all start with /api)
-  static const String scanEndpoint = '/api/cart/scan';
-  static const String cartEndpoint = '/api/cart';
+  // ✅ All endpoints defined in one place — no hardcoding elsewhere
+  static const String scanEndpoint     = '/api/cart/scan';
+  static const String cartEndpoint     = '/api/cart';
+  static const String checkoutEndpoint = '/api/cart/checkout';
+  static const String removeEndpoint   = '/api/cart/remove';
+  static const String loginEndpoint    = '/api/auth/login';
+  static const String registerEndpoint = '/api/auth/register';
 
-  // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);
-  static const Duration receiveTimeout = Duration(seconds: 30);
+  static const Duration receiveTimeout    = Duration(seconds: 30);
 
-  // Base headers without auth
   static Map<String, String> get baseHeaders => {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      };
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
 
-  // Headers with optional auth token
-  static Future<Map<String, String>> getHeaders({String? token}) async {
-    final base = Map<String, String>.from(baseHeaders);
-    if (token != null && token.isNotEmpty) {
-      base['Authorization'] = 'Bearer $token';
-    }
-    return base;
-  }
-
-  // Headers using stored token
+  // ✅ Auth headers — throws if token is missing so failures are obvious
   static Future<Map<String, String>> getAuthHeaders() async {
     final token = await TokenStorage.getToken();
-    return getHeaders(token: token);
+    if (token == null || token.isEmpty) {
+      throw Exception('No auth token found. User must log in first.');
+    }
+    return {
+      ...baseHeaders,
+      'Authorization': 'Bearer $token',
+    };
   }
+
+  // ✅ Public headers — for login/register only (no auth needed)
+  static Map<String, String> get publicHeaders => Map.from(baseHeaders);
 }

@@ -1,26 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Camera permission -->
+    <!-- Required to access the camera for barcode scanning -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- Camera features -->
+    <!-- Declares that the app uses a camera -->
     <uses-feature android:name="android.hardware.camera" android:required="true" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
+    <!-- ✅ FIX: android:hardwareAccelerated="true" at application level -->
+    <!-- mobile_scanner needs this to render the camera surface on Android. -->
+    <!-- Without it the camera feed is a black screen even if permission is granted. -->
     <application
         android:label="Self Checkout Grocery App"
         android:name="${applicationName}"
         android:hardwareAccelerated="true"
-        android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher">
-
-        <!-- 🔥 IMPORTANT: CameraX fix for Oppo / Android 11 black screen -->
-        <meta-data
-            android:name="androidx.camera.core.impl.useCaseConfigFactory"
-            android:value="androidx.camera.camera2.impl.Camera2ConfigProvider" />
 
         <activity
             android:name=".MainActivity"
@@ -42,7 +39,7 @@
 
         </activity>
 
-        <!-- Flutter embedding -->
+        <!-- Required by Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

@@ -1,3 +1,4 @@
+import 'dart:async';   // ✅ ADD: for TimeoutException
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -14,16 +15,16 @@ class ApiClient {
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
       final headers = await ApiConfig.getAuthHeaders();
-
       final response = await _client
           .get(uri, headers: headers)
           .timeout(ApiConfig.connectionTimeout);
-
-      return _handleResponse(response);
+      return _handleResponse(response, endpoint);
     } on SocketException {
       throw ApiException.networkError();
     } on HttpException {
       throw ApiException.serverError();
+    } on TimeoutException {                                    // ✅ FIX 1
+      throw ApiException(message: 'Request timed out. Check your connection.');
     } catch (e) {
       throw ApiException(message: 'Unexpected error: $e');
     }
@@ -34,20 +35,17 @@ class ApiClient {
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
       final headers = await ApiConfig.getAuthHeaders();
-
       final response = await _client
-          .post(
-            uri,
-            headers: headers,
-            body: body != null ? jsonEncode(body) : null,
-          )
+          .post(uri, headers: headers,
+          body: body != null ? jsonEncode(body) : null)
           .timeout(ApiConfig.connectionTimeout);
-
-      return _handleResponse(response);
+      return _handleResponse(response, endpoint);
     } on SocketException {
       throw ApiException.networkError();
     } on HttpException {
       throw ApiException.serverError();
+    } on TimeoutException {                                    // ✅ FIX 1
+      throw ApiException(message: 'Request timed out. Check your connection.');
     } catch (e) {
       throw ApiException(message: 'Unexpected error: $e');
     }
@@ -58,20 +56,17 @@ class ApiClient {
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
       final headers = await ApiConfig.getAuthHeaders();
-
       final response = await _client
-          .put(
-            uri,
-            headers: headers,
-            body: body != null ? jsonEncode(body) : null,
-          )
+          .put(uri, headers: headers,
+          body: body != null ? jsonEncode(body) : null)
           .timeout(ApiConfig.connectionTimeout);
-
-      return _handleResponse(response);
+      return _handleResponse(response, endpoint);
     } on SocketException {
       throw ApiException.networkError();
     } on HttpException {
       throw ApiException.serverError();
+    } on TimeoutException {                                    // ✅ FIX 1
+      throw ApiException(message: 'Request timed out. Check your connection.');
     } catch (e) {
       throw ApiException(message: 'Unexpected error: $e');
     }
@@ -82,27 +77,24 @@ class ApiClient {
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
       final headers = await ApiConfig.getAuthHeaders();
-
       final response = await _client
-          .delete(
-            uri,
-            headers: headers,
-            body: body != null ? jsonEncode(body) : null,
-          )
+          .delete(uri, headers: headers,
+          body: body != null ? jsonEncode(body) : null)
           .timeout(ApiConfig.connectionTimeout);
-
-      return _handleResponse(response);
+      return _handleResponse(response, endpoint);
     } on SocketException {
       throw ApiException.networkError();
     } on HttpException {
       throw ApiException.serverError();
+    } on TimeoutException {                                    // ✅ FIX 1
+      throw ApiException(message: 'Request timed out. Check your connection.');
     } catch (e) {
       throw ApiException(message: 'Unexpected error: $e');
     }
   }
 
   // ================= RESPONSE HANDLER =================
-  dynamic _handleResponse(http.Response response) {
+  dynamic _handleResponse(http.Response response, String endpoint) {  // ✅ FIX 2: added endpoint
     final statusCode = response.statusCode;
 
     if (statusCode >= 200 && statusCode < 300) {
@@ -113,7 +105,10 @@ class ApiClient {
     } else if (statusCode == 401) {
       throw ApiException.unauthorized();
     } else if (statusCode == 404) {
-      throw ApiException.notFound();
+      throw ApiException(                                      // ✅ FIX 2: endpoint in message
+        message: 'Not found: $endpoint',
+        statusCode: 404,
+      );
     } else if (statusCode >= 500) {
       throw ApiException.serverError();
     } else {

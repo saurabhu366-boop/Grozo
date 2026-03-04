@@ -3,16 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:provider/provider.dart';
-import 'package:shopzy/providers/auth_provider.dart';
 import 'package:shopzy/services/cart_api_service.dart' as backend;
 import 'package:shopzy/utils/app_colors.dart';
 import 'package:shopzy/widgets/cart_icon_widget.dart';
 
-// ✅ FINAL FIX: Removed permission_handler entirely.
-// mobile_scanner v3+ requests camera permission internally when MobileScanner
-// widget mounts. Our manual Permission.camera.status was returning a stale
-// cached value and blocking the camera widget from ever mounting.
+// ✅ FIX 1: Removed AuthProvider import — _userId getter deleted
+// ✅ FIX 2: Removed provider import — not needed after _userId removed
 
 class BarcodeScannerScreen extends StatefulWidget {
   const BarcodeScannerScreen({super.key});
@@ -25,14 +21,15 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
 
   final MobileScannerController _scannerController = MobileScannerController(
-    autoStart: true, // MobileScanner requests permission + starts itself
+    autoStart: true,
   );
   final backend.CartService _backendCartService = backend.CartService();
 
   bool _isScanning = false;
   bool _isTorchOn = false;
 
-  String get _userId => context.read<AuthProvider>().userId ?? '';
+  // ✅ FIX 1: Deleted _userId getter — userId now extracted from JWT on backend
+  // String get _userId => context.read<AuthProvider>().userId ?? '';
 
   late AnimationController _animationController;
   late Animation<double> _scanLineAnimation;
@@ -68,14 +65,17 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     HapticFeedback.mediumImpact();
 
     try {
-      await _backendCartService.scanProduct(code, _userId);
+      // ✅ FIX 2: No _userId — backend extracts it from JWT token
+      await _backendCartService.scanProduct(code);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('✓ Added to cart: $code'),
             backgroundColor: AppColors.primary,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -87,7 +87,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
             content: Text(e.toString().replaceFirst('Exception: ', '')),
             backgroundColor: Colors.red.shade600,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -113,9 +114,6 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // ✅ Mount MobileScanner directly — no permission gating.
-          // It shows the system permission dialog itself on first launch.
-          // errorBuilder handles denied/unsupported cases.
           MobileScanner(
             controller: _scannerController,
             onDetect: _onDetect,
@@ -123,13 +121,10 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
               return _ErrorView(error: error);
             },
           ),
-
           _BarcodeScannerOverlay(
             scanLineAnimation: _scanLineAnimation,
             isScanning: _isScanning,
           ),
-
-          // Top controls
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -149,7 +144,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                         backgroundColor: Colors.black54,
                         child: IconButton(
                           icon: Icon(
-                            _isTorchOn ? Icons.flashlight_on : Icons.flashlight_off,
+                            _isTorchOn
+                                ? Icons.flashlight_on
+                                : Icons.flashlight_off,
                             color: Colors.white,
                           ),
                           onPressed: () {
@@ -172,7 +169,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
   }
 }
 
-// ── Error view (permission denied / unsupported device) ──────────────────────
+// ── Error view ────────────────────────────────────────────────────────────────
 class _ErrorView extends StatelessWidget {
   final MobileScannerException error;
   const _ErrorView({required this.error});
@@ -200,7 +197,7 @@ class _ErrorView extends StatelessWidget {
               const SizedBox(height: 24),
               Text(
                 isPermissionError
-                    ? 'Camera permission is required to scan products.\n\nGo to Settings → Apps → Grozo → Permissions and enable Camera.'
+                    ? 'Camera permission is required to scan products.\n\nGo to Settings → Apps → Shopzy → Permissions and enable Camera.'
                     : 'Camera error: ${error.errorCode}',
                 style: const TextStyle(
                     color: Colors.white70, fontSize: 14, height: 1.6),
