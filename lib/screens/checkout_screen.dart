@@ -21,22 +21,20 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final CartService _cartService = CartService();
-  bool _placingOrder = false;
+  bool _confirming = false;  // ✅ renamed from _placingOrder
 
-  Future<void> _placeOrder() async {
-    setState(() => _placingOrder = true);
+  Future<void> _confirmCheckout() async {   // ✅ renamed from _placeOrder
+    setState(() => _confirming = true);
     try {
       final response = await _cartService.checkout();
       if (!mounted) return;
-
-      // Navigate to receipt, replacing checkout screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => ReceiptScreen(response: response)),
       );
     } catch (e) {
       if (!mounted) return;
-      setState(() => _placingOrder = false);
+      setState(() => _confirming = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.toString().replaceFirst('Exception: ', '')),
@@ -51,31 +49,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text("Checkout"),
+        title: const Text("Review & Pay"),   // ✅ was "Checkout"
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0.5,
       ),
-      bottomNavigationBar: _PlaceOrderBar(
+      bottomNavigationBar: _ConfirmBar(     // ✅ renamed widget
         totalAmount: widget.totalAmount,
-        placing: _placingOrder,
-        onPlace: _placeOrder,
+        confirming: _confirming,
+        onConfirm: _confirmCheckout,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
 
-          // ── Order Summary card ──
+          // ── Scanned Items card ──
           _SectionCard(
-            title: "Order Summary",
+            title: "Scanned Items",          // ✅ was "Order Summary"
             child: Column(
               children: [
                 ...widget.cartItems.map((item) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
                     children: [
-                      // Item icon
                       Container(
                         width: 44,
                         height: 44,
@@ -83,11 +80,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           color: Colors.green[50],
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.shopping_bag_outlined,
-                            color: Colors.green),
+                        child: const Icon(Icons.barcode_reader,
+                            color: Colors.green),  // ✅ barcode icon
                       ),
                       const SizedBox(width: 12),
-                      // Name + qty
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,7 +98,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           ],
                         ),
                       ),
-                      // Price
                       Text(
                         "₹${(item.price * item.quantity).toStringAsFixed(2)}",
                         style: const TextStyle(
@@ -112,12 +107,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                 )),
                 const Divider(height: 24),
-                // Price breakdown
+                // ✅ REMOVED: Delivery row entirely
                 _PriceRow(label: "Subtotal", value: widget.totalAmount),
-                const _PriceRow(label: "Delivery", value: 0, isFree: true),
                 const Divider(height: 16),
                 _PriceRow(
-                  label: "Total",
+                  label: "Amount to Pay",    // ✅ was "Total"
                   value: widget.totalAmount,
                   isBold: true,
                 ),
@@ -129,12 +123,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
           // ── Payment mode card ──
           _SectionCard(
-            title: "Payment Method",
+            title: "Payment",               // ✅ was "Payment Method"
             child: Row(
               children: [
-                const Icon(Icons.payments_outlined, color: Colors.green),
+                const Icon(Icons.point_of_sale, color: Colors.green), // ✅ POS icon
                 const SizedBox(width: 12),
-                const Text("Cash on Delivery",
+                const Text("Pay at Counter",  // ✅ was "Cash on Delivery"
                     style: TextStyle(fontWeight: FontWeight.w500)),
                 const Spacer(),
                 Container(
@@ -144,7 +138,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     color: Colors.green[50],
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text("Selected",
+                  child: const Text("In-Store",  // ✅ was "Selected"
                       style: TextStyle(
                           color: Colors.green,
                           fontSize: 12,
@@ -159,16 +153,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 }
 
-// ── Place Order bottom bar ────────────────────────────────────────────────────
-class _PlaceOrderBar extends StatelessWidget {
+// ── Confirm & Pay bottom bar ──────────────────────────────────────────────────
+class _ConfirmBar extends StatelessWidget {
   final double totalAmount;
-  final bool placing;
-  final VoidCallback onPlace;
+  final bool confirming;
+  final VoidCallback onConfirm;
 
-  const _PlaceOrderBar({
+  const _ConfirmBar({
     required this.totalAmount,
-    required this.placing,
-    required this.onPlace,
+    required this.confirming,
+    required this.onConfirm,
   });
 
   @override
@@ -187,17 +181,17 @@ class _PlaceOrderBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: ElevatedButton(
-          onPressed: placing ? null : onPlace,
+          onPressed: confirming ? null : onConfirm,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green[700],
             minimumSize: const Size(double.infinity, 52),
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12)),
           ),
-          child: placing
+          child: confirming
               ? const CircularProgressIndicator(color: Colors.white)
               : Text(
-            "Place Order  •  ₹${totalAmount.toStringAsFixed(2)}",
+            "Confirm & Pay  •  ₹${totalAmount.toStringAsFixed(2)}", // ✅ was "Place Order"
             style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -250,13 +244,11 @@ class _PriceRow extends StatelessWidget {
   final String label;
   final double value;
   final bool isBold;
-  final bool isFree;
 
   const _PriceRow({
     required this.label,
     required this.value,
     this.isBold = false,
-    this.isFree = false,
   });
 
   @override
@@ -268,19 +260,13 @@ class _PriceRow extends StatelessWidget {
         children: [
           Text(label,
               style: TextStyle(
-                  fontWeight:
-                  isBold ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
                   fontSize: isBold ? 16 : 14,
                   color: isBold ? Colors.black : Colors.grey[700])),
-          isFree
-              ? const Text("FREE",
-              style: TextStyle(
-                  color: Colors.green, fontWeight: FontWeight.bold))
-              : Text(
+          Text(
             "₹${value.toStringAsFixed(2)}",
             style: TextStyle(
-                fontWeight:
-                isBold ? FontWeight.bold : FontWeight.normal,
+                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
                 fontSize: isBold ? 16 : 14),
           ),
         ],
