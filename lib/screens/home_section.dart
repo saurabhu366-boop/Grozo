@@ -38,11 +38,13 @@ class HomeSection extends StatelessWidget {
         .cast<GroceryItem>()
         .toList();
 
+    final bottomPadding = MediaQuery.of(context).padding.bottom + 100;
+
     return Scaffold(
       body: SafeArea(
         bottom: false,
         child: ListView(
-          padding: const EdgeInsets.only(top: 20),
+          padding: EdgeInsets.only(top: 20, bottom: bottomPadding),
           children: [
             _buildHeader(context, firstName),
             const SizedBox(height: 24),
@@ -61,7 +63,6 @@ class HomeSection extends StatelessWidget {
             }, showSeeMore: true),
             const SizedBox(height: 16),
             _buildProductCarousel(recommendedItems),
-            const SizedBox(height: 120),
           ],
         ),
       ),

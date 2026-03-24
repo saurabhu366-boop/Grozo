@@ -117,6 +117,7 @@ class _CategorySectionState extends State<CategorySection> {
   @override
   Widget build(BuildContext context) {
     final filtered = _filtered;
+    final bottomPadding = MediaQuery.of(context).padding.bottom + 100;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7F2),
@@ -215,8 +216,8 @@ class _CategorySectionState extends State<CategorySection> {
             ),
           ),
 
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 120),
+          SliverToBoxAdapter(
+            child: SizedBox(height: bottomPadding),
           ),
         ],
       ),

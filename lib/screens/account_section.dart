@@ -57,6 +57,7 @@ class AccountSection extends StatelessWidget {
     final name = auth.fullName ?? 'User';
     final email = auth.email ?? '';
     final initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    final bottomPadding = MediaQuery.of(context).padding.bottom + 100;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7F2),
@@ -248,7 +249,7 @@ class AccountSection extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 120),
+                  SizedBox(height: bottomPadding),
                 ],
               ),
             ),

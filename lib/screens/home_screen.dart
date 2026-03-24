@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen>
                 onTap: _onItemTapped,
                 activeColor: activeGreen,
               ),
-              const SizedBox(width: 48),
+              const SizedBox(width: 80),
               _CartNavItem(
                 index: 2,
                 selectedIndex: _selectedIndex,
