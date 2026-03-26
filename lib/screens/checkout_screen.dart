@@ -21,9 +21,9 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final CartService _cartService = CartService();
-  bool _confirming = false;  // ✅ renamed from _placingOrder
+  bool _confirming = false;
 
-  Future<void> _confirmCheckout() async {   // ✅ renamed from _placeOrder
+  Future<void> _confirmCheckout() async {
     setState(() => _confirming = true);
     try {
       final response = await _cartService.checkout();
@@ -49,13 +49,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text("Review & Pay"),   // ✅ was "Checkout"
+        title: const Text("Review & Pay"),
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0.5,
       ),
-      bottomNavigationBar: _ConfirmBar(     // ✅ renamed widget
+      bottomNavigationBar: _ConfirmBar(
         totalAmount: widget.totalAmount,
         confirming: _confirming,
         onConfirm: _confirmCheckout,
@@ -66,7 +66,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
           // ── Scanned Items card ──
           _SectionCard(
-            title: "Scanned Items",          // ✅ was "Order Summary"
+            title: "Scanned Items",
             child: Column(
               children: [
                 ...widget.cartItems.map((item) => Padding(
@@ -107,11 +107,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                 )),
                 const Divider(height: 24),
-                // ✅ REMOVED: Delivery row entirely
+
                 _PriceRow(label: "Subtotal", value: widget.totalAmount),
                 const Divider(height: 16),
                 _PriceRow(
-                  label: "Amount to Pay",    // ✅ was "Total"
+                  label: "Amount to Pay",
                   value: widget.totalAmount,
                   isBold: true,
                 ),
@@ -123,12 +123,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
           // ── Payment mode card ──
           _SectionCard(
-            title: "Payment",               // ✅ was "Payment Method"
+            title: "Payment",
             child: Row(
               children: [
-                const Icon(Icons.point_of_sale, color: Colors.green), // ✅ POS icon
+                const Icon(Icons.point_of_sale, color: Colors.green),
                 const SizedBox(width: 12),
-                const Text("Pay at Counter",  // ✅ was "Cash on Delivery"
+                const Text("Pay at Counter",
                     style: TextStyle(fontWeight: FontWeight.w500)),
                 const Spacer(),
                 Container(
@@ -138,7 +138,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     color: Colors.green[50],
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text("In-Store",  // ✅ was "Selected"
+                  child: const Text("In-Store",
                       style: TextStyle(
                           color: Colors.green,
                           fontSize: 12,
@@ -191,7 +191,7 @@ class _ConfirmBar extends StatelessWidget {
           child: confirming
               ? const CircularProgressIndicator(color: Colors.white)
               : Text(
-            "Confirm & Pay  •  ₹${totalAmount.toStringAsFixed(2)}", // ✅ was "Place Order"
+            "Confirm & Pay  •  ₹${totalAmount.toStringAsFixed(2)}",
             style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

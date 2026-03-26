@@ -154,7 +154,7 @@ class _SignupScreenState extends State<SignupScreen>
 
                             // ── Headline ──────────────────────────
                             Text(
-                              'Join Grozo ✨',
+                              'Join Grozo ',
                               style: TextStyle(
                                 fontSize: 34,
                                 fontWeight: FontWeight.w900,
@@ -230,7 +230,7 @@ class _SignupScreenState extends State<SignupScreen>
                                     ),
 
                                     const SizedBox(height: 20),
-                                    _SectionLabel(label: 'Security'),
+                                    _SectionLabel(label: 'Password'),
                                     const SizedBox(height: 12),
 
                                     // Password

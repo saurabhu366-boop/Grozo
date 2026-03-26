@@ -80,7 +80,7 @@ class HomeSection extends StatelessWidget {
             children: [
               Text.rich(
                 TextSpan(
-                  text: 'Morning, ',
+                  text: 'Hello, ',
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -195,7 +195,7 @@ class HomeSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Grozo AI✨',
+                    'Grozo AI',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textOnBlack,
