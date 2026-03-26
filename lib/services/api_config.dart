@@ -10,6 +10,7 @@ class ApiConfig {
   static const String removeEndpoint   = '/api/cart/remove';
   static const String loginEndpoint    = '/api/auth/login';
   static const String registerEndpoint = '/api/auth/register';
+  static const String orderHistoryEndpoint = '/api/orders/history';
 
   static const Duration connectionTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout    = Duration(seconds: 30);

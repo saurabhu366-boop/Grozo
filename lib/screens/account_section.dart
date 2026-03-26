@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopzy/providers/auth_provider.dart';
 import 'package:shopzy/screens/edit_profile_screen.dart';
+import 'package:shopzy/screens/history_screen.dart';        // ✅ ADDED
 import 'package:shopzy/screens/login_screen.dart';
 import 'package:shopzy/screens/rewards_screen.dart';
-import 'package:shopzy/screens/scan_history_screen.dart';
+// ✅ REMOVED: import 'package:shopzy/screens/scan_history_screen.dart';
 import 'package:shopzy/utils/app_colors.dart';
 
 class AccountSection extends StatelessWidget {
@@ -33,7 +34,6 @@ class AccountSection extends StatelessWidget {
           TextButton(
             onPressed: () async {
               Navigator.of(dialogContext).pop();
-              // ✅ FIX: call AuthProvider.logout() to clear token from storage
               await context.read<AuthProvider>().logout();
               if (!context.mounted) return;
               Navigator.of(context).pushAndRemoveUntil(
@@ -52,7 +52,6 @@ class AccountSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ FIX: Read real user data from AuthProvider instead of hardcoded values
     final auth = context.watch<AuthProvider>();
     final name = auth.fullName ?? 'User';
     final email = auth.email ?? '';
@@ -82,7 +81,6 @@ class AccountSection extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const SizedBox(height: 48),
-                    // ✨ Avatar with green ring
                     Stack(
                       children: [
                         Container(
@@ -195,15 +193,18 @@ class AccountSection extends StatelessWidget {
                                 builder: (_) => const RewardsScreen())),
                       ),
                       _Divider(),
+
+                      // ✅ CHANGED: Scan History → Purchase History
                       _OptionTile(
-                        icon: Icons.history_rounded,
+                        icon: Icons.receipt_long_rounded,
                         iconColor: AppColors.primary,
-                        title: 'Scan History',
-                        subtitle: 'View past scans',
+                        title: 'Purchase History',
+                        subtitle: 'View your past orders',
                         onTap: () => Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (_) => const ScanHistoryScreen())),
+                                builder: (_) => const HistoryScreen())),
                       ),
+
                       _Divider(),
                       _OptionTile(
                         icon: Icons.edit_outlined,
@@ -365,7 +366,7 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ── Section card container ─────────────────────────────────────────────────────
+// ── Section card container ────────────────────────────────────────────────────
 class _SectionCard extends StatelessWidget {
   final List<Widget> children;
   const _SectionCard({required this.children});
