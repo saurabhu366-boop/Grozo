@@ -26,7 +26,7 @@ class _CategorySectionState extends State<CategorySection> {
     },
     {
       'name': 'Vegetables',
-      'image': 'https://wallpaperaccess.com/full/5502189.jpg',
+      'image': 'https://images.unsplash.com/photo-1542838132-92c53300491e',
       'color': const Color(0xFF51CF66),
       'icon': Icons.eco_rounded,
       'count': '95+ items',

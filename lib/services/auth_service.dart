@@ -1,9 +1,4 @@
-// ─────────────────────────────────────────────────────────────
-// lib/services/auth_service.dart
-//
-// Calls POST /api/auth/register  and  POST /api/auth/login
-// Persists the returned JWT via TokenStorage.
-// ─────────────────────────────────────────────────────────────
+
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;

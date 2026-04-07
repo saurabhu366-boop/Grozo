@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  static const Color backgroundLight = Color(0xFFF5F7F2);
   // --- Core Palette from Reference Image ---
   static const Color background = Color(0xFFF7F8F5); // Soft off-white
   static const Color secondarySurface = Colors.white; // For cards, search bar

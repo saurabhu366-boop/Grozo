@@ -1,6 +1,7 @@
 // lib/screens/product_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:shopzy/models/grocery_item.dart';
+import 'package:shopzy/services/product_image_service.dart';
 import 'package:shopzy/utils/app_colors.dart';
 import 'package:shopzy/widgets/nutrition_info_widget.dart';
 
@@ -71,17 +72,56 @@ class ProductDetailScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Image.network(
-                item.imagePath,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.image_not_supported,
-                    size: 60,
-                    color: AppColors.secondaryText),
+              child: FutureBuilder<String?>(
+                future: ProductImageService.getImageUrl(item.barcode),
+                builder: (context, snapshot) {
+                  // 🔄 Loading
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox(
+                      width: 60,
+                      height: 60,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    );
+                  }
+
+                  final imageUrl = snapshot.data;
+
+                  // 🌐 Network image
+                  if (imageUrl != null && imageUrl.isNotEmpty) {
+                    return Image.network(
+                      imageUrl,
+                      fit: BoxFit.contain,
+                      width: double.infinity,
+                      height: double.infinity,
+                      errorBuilder: (_, __, ___) => _assetFallback(),
+                    );
+                  }
+
+                  // 📦 Local asset fallback
+                  return _assetFallback();
+                },
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _assetFallback() {
+    if (item.imagePath.isNotEmpty) {
+      return Image.asset(
+        item.imagePath,
+        fit: BoxFit.contain,
+        width: double.infinity,
+        height: double.infinity,
+      );
+    }
+    return const Center(
+      child: Icon(
+        Icons.image_not_supported_outlined,
+        size: 60,
+        color: AppColors.secondaryText,
       ),
     );
   }
@@ -111,7 +151,7 @@ class ProductDetailScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '1000 gm', // Example text
+          '1000 gm',
           style: const TextStyle(fontSize: 16, color: AppColors.secondaryText),
         ),
         const SizedBox(height: 24),
@@ -131,8 +171,10 @@ class ProductDetailScreen extends StatelessWidget {
             const Text(
               '4.5 Rating',
               style: TextStyle(
-                  fontWeight: FontWeight.w600, color: AppColors.textCharcoal),
-            )
+                fontWeight: FontWeight.w600,
+                color: AppColors.textCharcoal,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 24),
@@ -141,7 +183,10 @@ class ProductDetailScreen extends StatelessWidget {
         Text(
           '100% satisfaction guarantee. If you experience any issues, we offer a full refund. All our products are sourced from trusted local suppliers. ${item.healthHint}.',
           style: const TextStyle(
-              fontSize: 15, color: AppColors.secondaryText, height: 1.6),
+            fontSize: 15,
+            color: AppColors.secondaryText,
+            height: 1.6,
+          ),
         ),
       ],
     );

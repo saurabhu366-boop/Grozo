@@ -52,9 +52,13 @@ flutter_launcher_icons:
   adaptive_icon_background: "#FAFAFA"
   adaptive_icon_foreground: assets/logo.png
   remove_alpha_ios: true
-
+  http: ^0.13.6
+flutter_gemini: ^3.0.0
+dash_chat_2: ^0.0.21
+google_generative_ai: ^0.4.7
 flutter:
   uses-material-design: true
 
   assets:
     - assets/logo.png
+    - assets/images/

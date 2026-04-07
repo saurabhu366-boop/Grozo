@@ -20,16 +20,12 @@ class HomeSection extends StatelessWidget {
     final firstName = name.split(' ').first;
 
     final List<String> recommendedBarcodes = [
-      '9876543210987',
-      '4567890123456',
-      '8901234567890',
-      '8901058901511',
-      '1234567890128',
-      '4567890123457',
-      '6543210987654',
-      '8901719255144',
-      '8901058901512',
-      '1112223334445',
+      '8901030505827',
+      '8901063130016',
+      '8906002310033',
+      '8901491107719',
+      '8901058851298',
+      '8901719101038',
     ];
 
     final recommendedItems = recommendedBarcodes
@@ -57,7 +53,8 @@ class HomeSection extends StatelessWidget {
             _buildSectionHeader('Recommended', () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => RecommendedProductsScreen(items: recommendedItems),
+                  builder: (context) =>
+                      RecommendedProductsScreen(items: recommendedItems),
                 ),
               );
             }, showSeeMore: true),
@@ -97,10 +94,16 @@ class HomeSection extends StatelessWidget {
               const SizedBox(height: 6),
               const Row(
                 children: [
-                  Icon(Icons.location_on, color: AppColors.secondaryText, size: 16),
+                  Icon(Icons.location_on,
+                      color: AppColors.secondaryText, size: 16),
                   SizedBox(width: 4),
-                  Text('Mumbai, Maharashtra',
-                      style: TextStyle(color: AppColors.secondaryText, fontWeight: FontWeight.w500)),
+                  Text(
+                    'Mumbai, Maharashtra',
+                    style: TextStyle(
+                      color: AppColors.secondaryText,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -115,7 +118,11 @@ class HomeSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title, VoidCallback onSeeMore, {bool showSeeMore = false}) {
+  Widget _buildSectionHeader(
+      String title,
+      VoidCallback onSeeMore, {
+        bool showSeeMore = false,
+      }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
@@ -135,9 +142,10 @@ class HomeSection extends StatelessWidget {
               child: const Text(
                 'See More >',
                 style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14),
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
             ),
         ],
@@ -147,13 +155,16 @@ class HomeSection extends StatelessWidget {
 
   Widget _buildProductCarousel(List<GroceryItem> items) {
     return SizedBox(
-      height: 250,
+      height: 260,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         scrollDirection: Axis.horizontal,
         itemCount: items.length,
         itemBuilder: (context, index) {
-          return ProductCard(item: items[index]);
+          return SizedBox(
+            width: 160, // 👈 fixed width prevents stretching
+            child: ProductCard(item: items[index]),
+          );
         },
         separatorBuilder: (context, index) => const SizedBox(width: 16),
       ),
@@ -175,7 +186,7 @@ class HomeSection extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 20),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E), // ✅ Updated AI card color
+          color: const Color(0xFF1A1A2E),
           borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
@@ -186,8 +197,11 @@ class HomeSection extends StatelessWidget {
                 color: AppColors.primary.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.psychology_alt_outlined,
-                  color: AppColors.primary, size: 28),
+              child: const Icon(
+                Icons.psychology_alt_outlined,
+                color: AppColors.primary,
+                size: 28,
+              ),
             ),
             const SizedBox(width: 16),
             const Expanded(
@@ -197,19 +211,26 @@ class HomeSection extends StatelessWidget {
                   Text(
                     'Grozo AI',
                     style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textOnBlack,
-                        fontSize: 16),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textOnBlack,
+                      fontSize: 16,
+                    ),
                   ),
                   Text(
                     'Based on your diet, we found 4 new recipes.',
-                    style: TextStyle(color: AppColors.secondaryText, fontSize: 12),
+                    style: TextStyle(
+                      color: AppColors.secondaryText,
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios,
-                color: AppColors.secondaryText, size: 16),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: AppColors.secondaryText,
+              size: 16,
+            ),
           ],
         ),
       ),
