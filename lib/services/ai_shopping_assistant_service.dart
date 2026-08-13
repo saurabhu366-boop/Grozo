@@ -3,7 +3,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 class AiShoppingAssistantService {
   // ⚠️ SECURITY: Never check this key into GitHub/GitLab.
   // Consider using 'flutter_dotenv' or '--dart-define' for production.
-  final String _apiKey = "AIzaSyDHsqxakWqYJlQLsoP_qtwt6-cDFhTC7zs";
+ 
 
   late final GenerativeModel _model;
 
